@@ -20,7 +20,6 @@ export default async function (req, res) {
       notion = _notion;
     }
   );
-  console.log('rows', rows);
 
   const blocks = (
     await notion.blocks.children.list({
@@ -29,23 +28,23 @@ export default async function (req, res) {
     })
   ).results;
 
-  console.log('blocks', blocks);
-
   // find first embed and
   // @ts-expect-error
   const firstEmbedIndex = blocks.findIndex((b) => b.type === 'embed');
   const deleteStartFrom = firstEmbedIndex + 1;
   console.log('delete start from', deleteStartFrom);
-  const deleteReq = Promise.all(
-    blocks
-      .slice(deleteStartFrom)
-      .map((b) => notion.blocks.delete({ block_id: b.id }))
-  );
+
+  // It seems the api cannot do multiple write in parallel
+  // (even on different block).
+  for (const b of blocks.slice(deleteStartFrom)) {
+    console.log('deleting', b.id);
+    await notion.blocks.delete({ block_id: b.id });
+  }
 
   // append new blocks
-  const appendReq = appendRowsToBlock(notion, rows, target);
+  const appendReq = await appendRowsToBlock(notion, rows, target);
 
-  await Promise.all([deleteReq, appendReq]);
+  // await Promise.all([deleteReq, appendReq]);
 
   return res.status(200).send('{}');
 }
