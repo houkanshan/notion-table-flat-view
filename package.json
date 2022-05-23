@@ -1,0 +1,13 @@
+{
+  "name": "notion-table-flatten-view",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "echo 'build'"
+  },
+  "dependencies": {
+    "@notionhq/client": "^1.0.4",
+    "notion-for-each-row": "^1.0.2"
+  }
+}
